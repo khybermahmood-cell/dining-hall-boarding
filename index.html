@@ -1,0 +1,635 @@
+<div style="background:#1A3A6C; font-family:'Inter',sans-serif; width:100%; height:100vh; margin:0; padding:0; overflow:hidden;">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .board {
+        background: #000000;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+    }
+    
+    /* Header - fixed height */
+    .header {
+        background: linear-gradient(135deg, #1A3A6C 0%, #122a4a 100%);
+        padding: 8px 16px;
+        border-radius: 10px;
+        border-left: 4px solid #FFF38C;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 10px;
+        margin-bottom: 8px;
+        flex-shrink: 0;
+    }
+    
+    .brand h1 {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        background: linear-gradient(135deg, #FFFFFF 0%, #A1D6E6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin: 0;
+        white-space: nowrap;
+    }
+    
+    .brand p {
+        font-size: 8px;
+        color: #A1D6E6;
+        margin-top: 2px;
+        white-space: nowrap;
+    }
+    
+    .live-time {
+        font-size: 22px;
+        font-weight: 800;
+        color: #FFF38C;
+        font-family: monospace;
+        background: rgba(0,0,0,0.5);
+        padding: 4px 12px;
+        border-radius: 30px;
+        border: 1px solid rgba(255,243,140,0.3);
+        white-space: nowrap;
+    }
+    
+    /* Info bar - fixed height */
+    .info-bar {
+        background: linear-gradient(135deg, #1A3A6C 0%, #122a4a 100%);
+        padding: 6px 16px;
+        border-radius: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 10px;
+        margin-bottom: 8px;
+        flex-shrink: 0;
+    }
+    
+    .boarding-now {
+        font-size: 11px;
+        font-weight: 700;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    
+    .boarding-now span {
+        background: #FFF38C;
+        color: #000000;
+        padding: 2px 8px;
+        border-radius: 25px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+    
+    .waiting-info {
+        font-size: 9px;
+        color: #A1D6E6;
+        white-space: nowrap;
+    }
+    
+    /* MAIN CONTENT - TAKES ALL REMAINING SPACE */
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 0;
+        overflow: hidden;
+    }
+    
+    /* Flights board */
+    .flights-board {
+        background: #000000;
+        border-radius: 10px;
+        border: 1px solid #1A3A6C;
+        flex: 3;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    
+    .board-header {
+        display: grid;
+        grid-template-columns: 80px 55px 1fr 90px;
+        background: linear-gradient(135deg, #1A3A6C 0%, #122a4a 100%);
+        padding: 6px 12px;
+        border-bottom: 2px solid #FFF38C;
+        font-size: 9px;
+        font-weight: 800;
+        color: #FFFFFF;
+        text-transform: uppercase;
+        flex-shrink: 0;
+    }
+    
+    .flight-rows-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    
+    .flight-row {
+        display: grid;
+        grid-template-columns: 80px 55px 1fr 90px;
+        padding: 8px 12px;
+        border-bottom: 1px solid #1A3A6C;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    
+    .flight-row:last-child {
+        border-bottom: none;
+    }
+    
+    .flight-row.boarding {
+        background: rgba(26,58,108,0.4);
+        border-left: 3px solid #CDE6B4;
+        animation: rowPulse 1.5s infinite;
+    }
+    
+    @keyframes rowPulse {
+        0%, 100% { background: rgba(26,58,108,0.4); }
+        50% { background: rgba(26,58,108,0.6); }
+    }
+    
+    .flight-time {
+        font-size: 12px;
+        font-weight: 800;
+        color: #FFF38C;
+        font-family: monospace;
+    }
+    
+    .flight-gate {
+        font-size: 12px;
+        font-weight: 800;
+        color: #A1D6E6;
+        font-family: monospace;
+    }
+    
+    .flight-destination {
+        font-size: 16px;
+        font-weight: 800;
+        color: #FFFFFF;
+        font-family: monospace;
+    }
+    
+    .flight-status {
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    
+    .status-boarding {
+        color: #CDE6B4;
+        animation: blink 0.8s infinite;
+        background: rgba(205,230,180,0.1);
+        padding: 2px 6px;
+        border-radius: 20px;
+        display: inline-block;
+        width: fit-content;
+    }
+    
+    .status-closed {
+        color: #D1D1D1;
+        background: rgba(209,209,209,0.1);
+        padding: 2px 6px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    
+    /* Upcoming section */
+    .upcoming-section {
+        background: #000000;
+        border-radius: 10px;
+        border: 1px solid #1A3A6C;
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    
+    .section-title {
+        background: linear-gradient(135deg, #1A3A6C 0%, #122a4a 100%);
+        padding: 5px 12px;
+        font-size: 8px;
+        font-weight: 800;
+        color: #FFF38C;
+        text-transform: uppercase;
+        border-bottom: 1px solid #A1D6E6;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+    }
+    
+    .section-title::before {
+        content: '✈';
+        font-size: 9px;
+        animation: takeoff 2s infinite;
+    }
+    
+    @keyframes takeoff {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(3px); }
+    }
+    
+    .upcoming-flights-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    
+    .upcoming-flight {
+        display: grid;
+        grid-template-columns: 65px 1fr;
+        padding: 6px 12px;
+        border-bottom: 1px solid #1A3A6C;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    
+    .upcoming-flight:last-child {
+        border-bottom: none;
+    }
+    
+    .upcoming-time {
+        font-size: 11px;
+        font-weight: 800;
+        color: #FFF38C;
+        font-family: monospace;
+    }
+    
+    .upcoming-classes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .class-tag {
+        background: linear-gradient(135deg, #1A3A6C 0%, #122a4a 100%);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 600;
+        color: #FFFFFF;
+        border: 1px solid rgba(161,214,230,0.2);
+    }
+    
+    .class-tag strong {
+        color: #FFF38C;
+        margin-right: 3px;
+    }
+    
+    /* Waiting area - NO EXTRA SPACE */
+    .waiting-area {
+        background: linear-gradient(135deg, #1A3A6C 0%, #122a4a 100%);
+        padding: 6px 12px;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid rgba(161,214,230,0.3);
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+        margin-top: 0;
+    }
+    
+    .waiting-area::before {
+        content: '✦';
+        position: absolute;
+        top: 4px;
+        left: 8px;
+        font-size: 14px;
+        color: rgba(255,243,140,0.1);
+    }
+    
+    .waiting-area::after {
+        content: '✦';
+        position: absolute;
+        bottom: 4px;
+        right: 8px;
+        font-size: 14px;
+        color: rgba(255,243,140,0.1);
+    }
+    
+    .waiting-area h3 {
+        font-size: 10px;
+        color: #FFF38C;
+        margin-bottom: 2px;
+    }
+    
+    .waiting-area p {
+        font-size: 8px;
+        color: #A1D6E6;
+    }
+    
+    /* Status screens */
+    .status-screen {
+        text-align: center;
+        padding: 30px 20px;
+        background: #000000;
+        border-radius: 10px;
+        border: 1px solid #1A3A6C;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .status-screen h2 {
+        font-size: 20px;
+        color: #FFF38C;
+        margin-bottom: 8px;
+    }
+    
+    .status-screen p {
+        font-size: 12px;
+        color: #A1D6E6;
+    }
+    
+    /* Hide scrollbars */
+    .flight-rows-container::-webkit-scrollbar,
+    .upcoming-flights-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Responsive */
+    @media (max-height: 700px) {
+        .flight-row { padding: 5px 12px; }
+        .flight-destination { font-size: 14px; }
+        .flight-time, .flight-gate { font-size: 11px; }
+        .header { padding: 6px 12px; }
+        .live-time { font-size: 18px; padding: 3px 10px; }
+        .brand h1 { font-size: 16px; }
+        .waiting-area { padding: 4px 10px; }
+        .waiting-area h3 { font-size: 9px; }
+        .waiting-area p { font-size: 7px; }
+    }
+</style>
+
+<div class="board">
+    <div class="header">
+        <div class="brand">
+            <h1>✈ DINING HALL DEPARTURES</h1>
+            <p>IES ÖREBRO • LUNCH BOARDING TIME</p>
+        </div>
+        <div class="live-time" id="liveTime">--:--:--</div>
+    </div>
+    
+    <div class="info-bar">
+        <div class="boarding-now">
+            🎯 CURRENT BOARDING
+            <span id="boardingCount">0</span>
+        </div>
+        <div class="waiting-info">
+            🚪 LINE UP • WAIT FOR YOUR CLASS
+        </div>
+    </div>
+    
+    <div class="main-content" id="mainContent">
+        <div id="content">Loading schedule...</div>
+    </div>
+</div>
+
+<script>
+    // ==================================================
+    // SCHEDULE DATA - EDIT THIS SECTION
+    // ==================================================
+    
+    const SCHEDULE = {
+        Monday: [
+            { time: "9:30:00 AM", t1: "6B", t2: "9C", t3: "4A", t4: "7D", t5: "5A", t6: "8C" },
+            { time: "10:20:00 AM", t1: "4B", t2: "5B", t3: "6D", t4: "8A", t5: "9B", t6: "7C" },
+            { time: "10:40:00 AM", t1: "7C", t2: "8A", t3: "9B", t4: "4D", t5: "6A", t6: "5C" },
+            { time: "11:00:00 AM", t1: "5C", t2: "7B", t3: "4D", t4: "9A", t5: "8B", t6: "6C" },
+            { time: "11:20:00 AM", t1: "8B", t2: "6A", t3: "7A", t4: "5D", t5: "9C", t6: "4A" },
+            { time: "11:40:00 AM", t1: "9A", t2: "4B", t3: "7D", t4: "6B", t5: "8C", t6: "5A" },
+            { time: "12:00:00 PM", t1: "4A", t2: "5B", t3: "6D", t4: "8A", t5: "9B", t6: "7C" },
+            { time: "12:20:00 PM", t1: "7C", t2: "8A", t3: "9B", t4: "4D", t5: "6A", t6: "5C" },
+            { time: "12:40:00 PM", t1: "5C", t2: "7B", t3: "4D", t4: "9A", t5: "8B", t6: "6C" },
+            { time: "1:00:00 PM", t1: "END", t2: "END", t3: "END", t4: "END", t5: "END", t6: "END" }
+        ],
+        Tuesday: [
+            { time: "10:00:00 AM", t1: "7A", t2: "8B", t3: "5C", t4: "9D", t5: "6B", t6: "4C" },
+            { time: "10:20:00 AM", t1: "5D", t2: "6C", t3: "8A", t4: "4B", t5: "9A", t6: "7B" },
+            { time: "10:40:00 AM", t1: "8C", t2: "4D", t3: "7B", t4: "5A", t5: "6D", t6: "9C" },
+            { time: "11:00:00 AM", t1: "4A", t2: "9B", t3: "6C", t4: "7D", t5: "8A", t6: "5B" },
+            { time: "11:20:00 AM", t1: "6A", t2: "7C", t3: "9D", t4: "8B", t5: "4C", t6: "5D" },
+            { time: "11:40:00 AM", t1: "9C", t2: "5A", t3: "4B", t4: "6D", t5: "7A", t6: "8C" },
+            { time: "12:00:00 PM", t1: "5B", t2: "8A", t3: "7C", t4: "4A", t5: "9D", t6: "6B" },
+            { time: "12:20:00 PM", t1: "7D", t2: "6B", t3: "9A", t4: "5C", t5: "8C", t6: "4D" },
+            { time: "12:40:00 PM", t1: "8B", t2: "4C", t3: "5D", t4: "9B", t5: "6A", t6: "7A" },
+            { time: "1:00:00 PM", t1: "END", t2: "END", t3: "END", t4: "END", t5: "END", t6: "END" }
+        ],
+        Wednesday: [
+            { time: "10:00:00 AM", t1: "8A", t2: "6D", t3: "9C", t4: "5B", t5: "7C", t6: "4A" },
+            { time: "10:20:00 AM", t1: "4B", t2: "7A", t3: "5D", t4: "8C", t5: "6B", t6: "9D" },
+            { time: "10:40:00 AM", t1: "9B", t2: "5C", t3: "8A", t4: "6A", t5: "4D", t6: "7B" },
+            { time: "11:00:00 AM", t1: "6C", t2: "4D", t3: "7B", t4: "9A", t5: "5A", t6: "8D" },
+            { time: "11:20:00 AM", t1: "7D", t2: "8B", t3: "4C", t4: "5D", t5: "9C", t6: "6A" },
+            { time: "11:40:00 AM", t1: "5A", t2: "9C", t3: "6B", t4: "7C", t5: "8D", t6: "4B" },
+            { time: "12:00:00 PM", t1: "8C", t2: "4A", t3: "7D", t4: "6B", t5: "5C", t6: "9A" },
+            { time: "12:20:00 PM", t1: "4D", t2: "6A", t3: "5B", t4: "8A", t5: "9D", t6: "7C" },
+            { time: "12:40:00 PM", t1: "9B", t2: "7D", t3: "8C", t4: "4C", t5: "6D", t6: "5A" },
+            { time: "1:00:00 PM", t1: "END", t2: "END", t3: "END", t4: "END", t5: "END", t6: "END" }
+        ],
+        Thursday: [
+            { time: "10:00:00 AM", t1: "9D", t2: "4C", t3: "7A", t4: "6B", t5: "8A", t6: "5D" },
+            { time: "10:20:00 AM", t1: "5B", t2: "8D", t3: "4A", t4: "9C", t5: "7B", t6: "6C" },
+            { time: "10:40:00 AM", t1: "6A", t2: "7C", t3: "9B", t4: "5A", t5: "4D", t6: "8B" },
+            { time: "11:00:00 AM", t1: "8C", t2: "5D", t3: "6C", t4: "4B", t5: "9A", t6: "7A" },
+            { time: "11:20:00 AM", t1: "4D", t2: "9A", t3: "8B", t4: "7C", t5: "6A", t6: "5C" },
+            { time: "11:40:00 AM", t1: "7B", t2: "6D", t3: "5C", t4: "8A", t5: "4C", t6: "9D" },
+            { time: "12:00:00 PM", t1: "5A", t2: "4B", t3: "9D", t4: "6C", t5: "8B", t6: "7D" },
+            { time: "12:20:00 PM", t1: "6B", t2: "9C", t3: "4A", t4: "7D", t5: "5A", t6: "8C" },
+            { time: "12:40:00 PM", t1: "8A", t2: "5C", t3: "7D", t4: "4B", t5: "9B", t6: "6D" },
+            { time: "1:00:00 PM", t1: "END", t2: "END", t3: "END", t4: "END", t5: "END", t6: "END" }
+        ],
+        Friday: [
+            { time: "10:00:00 AM", t1: "5C", t2: "9B", t3: "8D", t4: "4A", t5: "7A", t6: "6C" },
+            { time: "10:20:00 AM", t1: "6D", t2: "4C", t3: "5A", t4: "9D", t5: "8B", t6: "7B" },
+            { time: "10:40:00 AM", t1: "7C", t2: "8A", t3: "4B", t4: "5D", t5: "9C", t6: "6A" },
+            { time: "11:00:00 AM", t1: "9A", t2: "6B", t3: "7D", t4: "8C", t5: "4D", t6: "5B" },
+            { time: "11:20:00 AM", t1: "4C", t2: "5D", t3: "6A", t4: "7B", t5: "8A", t6: "9C" },
+            { time: "11:40:00 AM", t1: "8B", t2: "7C", t3: "9D", t4: "6C", t5: "5A", t6: "4D" },
+            { time: "12:00:00 PM", t1: "6A", t2: "4B", t3: "8C", t4: "9A", t5: "7D", t6: "5C" },
+            { time: "12:20:00 PM", t1: "7D", t2: "5A", t3: "4C", t4: "8B", t5: "6B", t6: "9A" },
+            { time: "12:40:00 PM", t1: "9C", t2: "6D", t3: "5B", t4: "4A", t5: "8D", t6: "7C" },
+            { time: "1:00:00 PM", t1: "END", t2: "END", t3: "END", t4: "END", t5: "END", t6: "END" }
+        ]
+    };
+
+    // REAL-TIME CLOCK
+    function updateRealTimeClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('sv-SE');
+        document.getElementById('liveTime').innerText = timeString;
+    }
+    
+    updateRealTimeClock();
+    setInterval(updateRealTimeClock, 1000);
+
+    function getTodayName() {
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return days[new Date().getDay()];
+    }
+
+    function parseTime(timeStr) {
+        const match = timeStr.match(/(\d{1,2}):(\d{2}):(\d{2})\s+(AM|PM)/i);
+        if (!match) return null;
+        let hour = parseInt(match[1]);
+        const minute = parseInt(match[2]);
+        const ampm = match[4].toUpperCase();
+        if (ampm === 'PM' && hour !== 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0;
+        return { hour, minute, total: hour * 60 + minute };
+    }
+
+    function updateDisplay() {
+        const todayName = getTodayName();
+        const schedule = SCHEDULE[todayName];
+        
+        if (!schedule) {
+            document.getElementById('content').innerHTML = '<div class="status-screen"><h2>⏰ NO SCHEDULE</h2><p>No schedule found for ' + todayName + '</p></div>';
+            document.getElementById('boardingCount').innerText = '0';
+            return;
+        }
+
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
+        const parsedSchedule = schedule.map(item => ({
+            ...item,
+            timeMinutes: parseTime(item.time)?.total || 0
+        }));
+        
+        let currentSlot = null;
+        let currentIndex = -1;
+        
+        for (let i = 0; i < parsedSchedule.length; i++) {
+            if (currentMinutes >= parsedSchedule[i].timeMinutes) {
+                currentSlot = parsedSchedule[i];
+                currentIndex = i;
+            }
+        }
+        
+        if (!currentSlot && parsedSchedule.length > 0) {
+            const firstSlot = parsedSchedule[0];
+            document.getElementById('content').innerHTML = '<div class="status-screen"><h2>✈ FIRST DEPARTURE AT ' + firstSlot.time + '</h2><p>Please wait. Boarding will begin soon.</p></div>';
+            document.getElementById('boardingCount').innerText = '0';
+            return;
+        }
+        
+        if (currentSlot && currentSlot.t1 === 'END') {
+            document.getElementById('content').innerHTML = '<div class="status-screen"><h2>🔒 LUNCH SERVICE ENDED</h2><p>Thank you for dining with us. See you tomorrow!</p></div>';
+            document.getElementById('boardingCount').innerText = '0';
+            return;
+        }
+        
+        const nextSlot = parsedSchedule[currentIndex + 1] || null;
+        const afterSlot = parsedSchedule[currentIndex + 2] || null;
+        
+        const tables = [
+            { name: "T1", class: currentSlot.t1 },
+            { name: "T2", class: currentSlot.t2 },
+            { name: "T3", class: currentSlot.t3 },
+            { name: "T4", class: currentSlot.t4 },
+            { name: "T5", class: currentSlot.t5 },
+            { name: "T6", class: currentSlot.t6 }
+        ];
+        
+        const activeTables = tables.filter(t => t.class !== 'END' && t.class !== '—');
+        document.getElementById('boardingCount').innerText = activeTables.length;
+        
+        let html = `
+            <div class="flights-board">
+                <div class="board-header">
+                    <div>TIME</div>
+                    <div>TABLE</div>
+                    <div>CLASS</div>
+                    <div>STATUS</div>
+                </div>
+                <div class="flight-rows-container">
+        `;
+        
+        tables.forEach(table => {
+            const isActive = table.class !== 'END' && table.class !== '—';
+            html += `
+                <div class="flight-row ${isActive ? 'boarding' : ''}">
+                    <div class="flight-time">${currentSlot.time}</div>
+                    <div class="flight-gate">${table.name}</div>
+                    <div class="flight-destination">${table.class}</div>
+                    <div class="flight-status ${isActive ? 'status-boarding' : 'status-closed'}">
+                        ${isActive ? '🔔 BOARDING NOW' : 'CLOSED'}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+        
+        if (nextSlot || afterSlot) {
+            html += `<div class="upcoming-section"><div class="section-title">UPCOMING DEPARTURES</div><div class="upcoming-flights-container">`;
+            
+            if (nextSlot && nextSlot.t1 !== 'END') {
+                const nextTables = [
+                    { name: "T1", class: nextSlot.t1 }, { name: "T2", class: nextSlot.t2 },
+                    { name: "T3", class: nextSlot.t3 }, { name: "T4", class: nextSlot.t4 },
+                    { name: "T5", class: nextSlot.t5 }, { name: "T6", class: nextSlot.t6 }
+                ];
+                html += `<div class="upcoming-flight"><div class="upcoming-time">${nextSlot.time}</div><div class="upcoming-classes">`;
+                html += nextTables.filter(t => t.class !== 'END').map(t => `<div class="class-tag"><strong>${t.name}:</strong> ${t.class}</div>`).join('');
+                html += `</div></div>`;
+            }
+            
+            if (afterSlot && afterSlot.t1 !== 'END') {
+                const afterTables = [
+                    { name: "T1", class: afterSlot.t1 }, { name: "T2", class: afterSlot.t2 },
+                    { name: "T3", class: afterSlot.t3 }, { name: "T4", class: afterSlot.t4 },
+                    { name: "T5", class: afterSlot.t5 }, { name: "T6", class: afterSlot.t6 }
+                ];
+                html += `<div class="upcoming-flight"><div class="upcoming-time">${afterSlot.time}</div><div class="upcoming-classes">`;
+                html += afterTables.filter(t => t.class !== 'END').map(t => `<div class="class-tag"><strong>${t.name}:</strong> ${t.class}</div>`).join('');
+                html += `</div></div>`;
+            }
+            
+            html += `</div></div>`;
+        }
+        
+        html += `
+            <div class="waiting-area">
+                <h3>🚪 DINING HALL ENTRANCE</h3>
+                <p>When you see your class under "BOARDING NOW", proceed to your assigned table</p>
+            </div>
+        `;
+        
+        document.getElementById('content').innerHTML = html;
+    }
+    
+    updateDisplay();
+    setInterval(updateDisplay, 30000);
+</script>
+</div>
